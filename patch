@@ -1,0 +1,16 @@
+diff -up ./Zend/zend_objects_API.c.old ./Zend/zend_objects_API.c
+--- ./Zend/zend_objects_API.c.old       2019-01-16 15:05:03.487365313 +0300
++++ ./Zend/zend_objects_API.c   2019-01-16 15:06:31.750081871 +0300
+@@ -114,8 +114,10 @@ ZEND_API zend_object_handle zend_objects
+                EG(objects_store).free_list_head = EG(objects_store).object_buckets[handle].bucket.free_list.next;
+        } else {
+                if (EG(objects_store).top == EG(objects_store).size) {
+-                       EG(objects_store).size <<= 1;
+-                       EG(objects_store).object_buckets = (zend_object_store_bucket *) erealloc(EG(objects_store).object_buckets, EG(objects_store).size * sizeof(zend_object_store_bucket));
++                       zend_uint new_size = 2 * EG(objects_store).size;
++                       EG(objects_store).object_buckets = (zend_object_store_bucket *) erealloc(EG(objects_store).object_buckets, new_size * sizeof(zend_object_store_bucket));
++                       /* Assign size after realloc, in case it fails */
++                       EG(objects_store).size = new_size;
+                }
+                handle = EG(objects_store).top++;
+        }
